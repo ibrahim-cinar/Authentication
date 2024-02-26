@@ -5,9 +5,11 @@ import com.cinar.authentication.dto.request.CreateUserRequest;
 import com.cinar.authentication.dto.request.UpdateUserRequest;
 import com.cinar.authentication.model.User;
 import com.cinar.authentication.repository.UserRepository;
+import com.cinar.authentication.service.JwtService;
 import com.cinar.authentication.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +22,14 @@ public class UserController {
     private final UserService userService;
     private final ModelMapper modelMapper ;
 
-    public UserController(UserService userService, ModelMapper modelMapper) {
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
+
+    public UserController(UserService userService, ModelMapper modelMapper, JwtService jwtService, AuthenticationManager authenticationManager) {
         this.userService = userService;
         this.modelMapper = modelMapper;
+        this.jwtService = jwtService;
+        this.authenticationManager = authenticationManager;
     }
 
     @GetMapping("")
@@ -52,6 +59,6 @@ public class UserController {
     @DeleteMapping("/delete/{username}")
     public ResponseEntity<String> deleteUser(@PathVariable String username){
         userService.deleteUser(username);
-        return ResponseEntity.ok("User deleted successfully");
+        return ResponseEntity.ok().build();
     }
 }

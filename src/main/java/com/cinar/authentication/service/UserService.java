@@ -150,16 +150,19 @@ public class UserService implements UserDetailsService {
         }
     }
     public void deleteUser(String username) {
-
         if (doesUserExist(username)) {
-            userRepository.deleteById(username);
+            userRepository.deleteUserByUsername(username);
+            logger.info("Kullanıcı başarıyla silindi: {}", username);
             throw new ResponseStatusException(HttpStatus.OK, "User deleted");
         } else {
+            logger.warn("Kullanıcı bulunamadı: {}", username);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
     }
 
+
     private boolean doesUserExist(String username) {
-        return userRepository.existsById(username);
+        return userRepository.findByUsername(username).isPresent();
+
     }
 }
