@@ -10,7 +10,8 @@ import java.util.List;
 @SuperBuilder
 @Data
 @Entity
-@Table(name = "tbl_users") @Builder
+@Table(name = "tbl_users")
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User  extends BaseEntity implements UserDetails {

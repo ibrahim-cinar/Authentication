@@ -15,15 +15,13 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class AuthController {
 
-    private final UserService service;
 
     private final JwtService jwtService;
 
     private final AuthenticationManager authenticationManager;
 
 
-    public AuthController(UserService service, JwtService jwtService, AuthenticationManager authenticationManager) {
-        this.service = service;
+    public AuthController(JwtService jwtService, AuthenticationManager authenticationManager) {
         this.jwtService = jwtService;
         this.authenticationManager = authenticationManager;
     }

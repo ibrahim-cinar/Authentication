@@ -1,6 +1,5 @@
 package com.cinar.authentication.service;
 
-import com.cinar.authentication.config.PasswordEncoderConfig;
 import com.cinar.authentication.dto.UserDto;
 import com.cinar.authentication.dto.request.CreateUserRequest;
 import com.cinar.authentication.dto.request.UpdateUserRequest;
