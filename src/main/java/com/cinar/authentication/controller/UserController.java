@@ -2,6 +2,7 @@ package com.cinar.authentication.controller;
 
 import com.cinar.authentication.dto.UserDto;
 import com.cinar.authentication.dto.request.CreateUserRequest;
+import com.cinar.authentication.dto.request.UpdateUserRequest;
 import com.cinar.authentication.model.User;
 import com.cinar.authentication.repository.UserRepository;
 import com.cinar.authentication.service.UserService;
@@ -40,7 +41,17 @@ public class UserController {
     }
     @PostMapping("/create")
     public ResponseEntity<UserDto> createUser(@RequestBody CreateUserRequest createUserRequest){
-        var user = modelMapper.map(userService.createUser(createUserRequest),UserDto.class);
+        var user = modelMapper.map(userService.createNewUser(createUserRequest),UserDto.class);
         return ResponseEntity.ok(user);
+    }
+    @PutMapping("/update/{email}")
+    public ResponseEntity<UserDto> updateUser(@PathVariable String email,@RequestBody UpdateUserRequest updateUserRequest){
+        var user = modelMapper.map(userService.updateUser(email,updateUserRequest),UserDto.class);
+        return ResponseEntity.ok(user);
+    }
+    @DeleteMapping("/delete/{username}")
+    public ResponseEntity<String> deleteUser(@PathVariable String username){
+        userService.deleteUser(username);
+        return ResponseEntity.ok("User deleted successfully");
     }
 }

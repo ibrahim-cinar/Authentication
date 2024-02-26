@@ -3,21 +3,21 @@ package com.cinar.authentication.service;
 import com.cinar.authentication.config.PasswordEncoderConfig;
 import com.cinar.authentication.dto.UserDto;
 import com.cinar.authentication.dto.request.CreateUserRequest;
-import com.cinar.authentication.exceptions.EmailAlreadyExistException;
-import com.cinar.authentication.exceptions.EmailNotFoundException;
-import com.cinar.authentication.exceptions.InvalidInputException;
-import com.cinar.authentication.exceptions.UserNotFoundException;
+import com.cinar.authentication.dto.request.UpdateUserRequest;
+import com.cinar.authentication.exceptions.*;
 import com.cinar.authentication.model.User;
 import com.cinar.authentication.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -90,7 +90,7 @@ public class UserService implements UserDetailsService {
                 request.getLastName() != null &&
                 request.getEmail() != null &&
                 request.getPassword() != null &&
-                request.getRole() != null;
+                request.getAuthorities() != null;
     }
 
     public User createUser(CreateUserRequest request) {
@@ -100,7 +100,8 @@ public class UserService implements UserDetailsService {
                 request.getEmail(),
                 request.getPhoneNumber()
                 , true, true, true,
-                true, request.getRole());
+                true,
+                request.getAuthorities());
     }
 
     public User createUserFromRequest(CreateUserRequest request) {
@@ -122,5 +123,43 @@ public class UserService implements UserDetailsService {
     public User createNewUser(CreateUserRequest createUserRequest) {
         User user = createUserFromRequest(createUserRequest);
         return userRepository.save(user);
+    }
+
+    public User updateUser(String email, UpdateUserRequest updateUserRequest) {
+        User user = findUserByEmail(email)
+                .orElseThrow(() -> new EmailNotFoundException("Email not found: " + email));
+
+        validateUniqueFields(user, updateUserRequest);
+
+        user.setUsername(updateUserRequest.getUsername());
+        user.setFirstName(updateUserRequest.getFirstName());
+        user.setLastName(updateUserRequest.getLastName());
+        user.setEmail(updateUserRequest.getEmail());
+
+        User updatedUser = userRepository.save(user);
+        return modelMapper.map(updatedUser, User.class);
+    }
+
+    protected void validateUniqueFields(User user, UpdateUserRequest updateUserRequest) {
+        if (!user.getEmail().equals(updateUserRequest.getEmail()) && !isEmailUnique(updateUserRequest.getEmail())) {
+            throw new EmailAlreadyExistException("Email already exists");
+        }
+
+        if (!user.getUsername().equals(updateUserRequest.getUsername()) && !isUsernameUnique(updateUserRequest.getUsername())) {
+            throw new UsernameAlreadyExistException("Username already exists");
+        }
+    }
+    public void deleteUser(String username) {
+
+        if (doesUserExist(username)) {
+            userRepository.deleteById(username);
+            throw new ResponseStatusException(HttpStatus.OK, "User deleted");
+        } else {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+    }
+
+    private boolean doesUserExist(String username) {
+        return userRepository.existsById(username);
     }
 }

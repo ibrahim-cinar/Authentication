@@ -48,6 +48,9 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<?> EmailAlreadyExistExceptionHandler(EmailAlreadyExistException EmailAlreadyExistException)  {
         return new ResponseEntity<>(EmailAlreadyExistException.getMessage(), HttpStatus.CONFLICT);
     }
+    @ExceptionHandler(UsernameAlreadyExistException.class)
+    public ResponseEntity<?> UsernameAlreadyExistExceptionHandler(UsernameAlreadyExistException UsernameAlreadyExistException)  {
+        return new ResponseEntity<>(UsernameAlreadyExistException.getMessage(), HttpStatus.CONFLICT);}
     @ExceptionHandler(InvalidInputException.class)
     public ResponseEntity<?> InvalidInputExceptionHandler(InvalidInputException InvalidInputException)  {
         return new ResponseEntity<>(InvalidInputException.getMessage(), HttpStatus.BAD_REQUEST);
@@ -57,9 +60,7 @@ public class GeneralExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(EntityNotFoundException.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(UsernameAlreadyExistException.class)
-    public ResponseEntity<?> UsernameAlreadyExistExceptionHandler(UsernameAlreadyExistException UsernameAlreadyExistException)  {
-        return new ResponseEntity<>(UsernameAlreadyExistException.getMessage(), HttpStatus.CONFLICT);
+
     }
 */
 

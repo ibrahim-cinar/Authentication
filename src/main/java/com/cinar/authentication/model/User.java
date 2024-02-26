@@ -29,7 +29,7 @@ public class User  extends BaseEntity implements UserDetails {
     private boolean isEnabled;
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @JoinTable(name = "authorities", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "role", nullable = false)
+    @Column(name = "authority", nullable = false)
     @Enumerated(EnumType.STRING)
     private List<Role> authorities;
 
