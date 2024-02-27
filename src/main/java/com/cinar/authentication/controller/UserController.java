@@ -36,11 +36,11 @@ public class UserController {
     public ResponseEntity<List<UserDto>> getAllUsers(){
         return ResponseEntity.ok(userService.getAllUsers());
     }
-    @GetMapping("/username/{username}")
+    /*@GetMapping("/username/{username}")
     public ResponseEntity<UserDto> getUserByUsername(@PathVariable String username){
         var user = modelMapper.map(userService.getUserByUsername(username),UserDto.class);
         return ResponseEntity.ok(user);
-    }
+    }*/
     @GetMapping("/email/{email}")
     public ResponseEntity<UserDto> getUserByEmail(@PathVariable String email){
         var user = modelMapper.map(userService.getUserByEmail(email),UserDto.class);

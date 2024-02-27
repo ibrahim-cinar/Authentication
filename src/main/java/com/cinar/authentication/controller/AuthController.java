@@ -1,13 +1,17 @@
 package com.cinar.authentication.controller;
 
-import com.cinar.authentication.dto.request.AuthRequest;
+import com.cinar.authentication.dto.UserDto;
+import com.cinar.authentication.dto.request.RefreshTokenRequest;
+import com.cinar.authentication.dto.request.SignInRequest;
+import com.cinar.authentication.dto.request.SignUpRequest;
+import com.cinar.authentication.dto.response.JwtAuthenticationResponse;
+import com.cinar.authentication.model.User;
+import com.cinar.authentication.service.AuthService;
 import com.cinar.authentication.service.JwtService;
-import com.cinar.authentication.service.UserService;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,25 +19,26 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class AuthController {
 
+    private final AuthService authService;
 
-    private final JwtService jwtService;
-
-    private final AuthenticationManager authenticationManager;
+    public AuthController(AuthService authService) {
 
 
-    public AuthController(JwtService jwtService, AuthenticationManager authenticationManager) {
-        this.jwtService = jwtService;
-        this.authenticationManager = authenticationManager;
+        this.authService = authService;
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<User> signUp(@RequestBody SignUpRequest signUpRequest) {
+        return ResponseEntity.ok(authService.signUpNewUser(signUpRequest));
+    }
+    @PostMapping("/signIn")
+    public ResponseEntity<JwtAuthenticationResponse> signIn(@RequestBody SignInRequest signInRequest) {
+        return ResponseEntity.ok(authService.signIn(signInRequest));
+    }
+    @PostMapping("/refresh")
+    public ResponseEntity<JwtAuthenticationResponse> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+        return ResponseEntity.ok(authService.refreshToken(refreshTokenRequest));
     }
 
 
-    @PostMapping("/generateToken")
-    public String generateToken(@RequestBody AuthRequest authRequest){
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(authRequest.getUsername(),authRequest.getPassword()));
-        if(authentication.isAuthenticated()){
-            return jwtService.generateToken(authRequest.getUsername());
-        }
-        throw new UsernameNotFoundException("Invalid username {}" +authRequest.getUsername());
-    }
 }

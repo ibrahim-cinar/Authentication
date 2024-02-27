@@ -41,15 +41,15 @@ public class UserService implements UserDetailsService {
 
     }
 
-    protected Optional<User> findUserByUsername(String username) {
+   /* protected Optional<User> findUserByUsername(String username)
         return userRepository.findByUsername(username);
     }
 
-    public User getUserByUsername(String username) {
+    /*public User getUserByUsername(String username) {
         return findUserByUsername(username).orElseThrow(() -> new UserNotFoundException("User could not find by username " + username));
 
 
-    }
+    }*/
 
     protected Optional<User> findUserByEmail(String email) {
         return userRepository.findUserByEmail(email);
@@ -62,7 +62,7 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findByUsername(username);
+        Optional<User> user = userRepository.findUserByEmail(username);
         return user.orElseThrow(EntityNotFoundException::new);
     }
 
@@ -77,14 +77,14 @@ public class UserService implements UserDetailsService {
         return existingUserEmail.isEmpty();
     }
 
-    protected boolean isUsernameUnique(String username) {
+    /*protected boolean isUsernameUnique(String username) {
         Optional<User> existingUserUsername = userRepository.findByUsername(username);
         return existingUserUsername.isEmpty();
-    }
+    }*/
 
 
     private static boolean isInputValid(CreateUserRequest request) {
-        return request.getUsername() != null &&
+        return
                 request.getFirstName() != null &&
                 request.getLastName() != null &&
                 request.getEmail() != null &&
@@ -93,13 +93,11 @@ public class UserService implements UserDetailsService {
     }
 
     public User createUser(CreateUserRequest request) {
-        return new User(request.getUsername(),
-                bCryptPasswordEncoder.encode(request.getPassword()),
+        return new User(
                 request.getFirstName(), request.getLastName(),
                 request.getEmail(),
-                request.getPhoneNumber()
-                , true, true, true,
-                true,
+                bCryptPasswordEncoder.encode(request.getPassword()),
+                request.getPhoneNumber(),
                 request.getAuthorities());
     }
 
@@ -130,7 +128,6 @@ public class UserService implements UserDetailsService {
 
         validateUniqueFields(user, updateUserRequest);
 
-        user.setUsername(updateUserRequest.getUsername());
         user.setFirstName(updateUserRequest.getFirstName());
         user.setLastName(updateUserRequest.getLastName());
         user.setEmail(updateUserRequest.getEmail());
@@ -144,24 +141,24 @@ public class UserService implements UserDetailsService {
             throw new EmailAlreadyExistException("Email already exists");
         }
 
-        if (!user.getUsername().equals(updateUserRequest.getUsername()) && !isUsernameUnique(updateUserRequest.getUsername())) {
+       /* if (!user.getUsername().equals(updateUserRequest.getUsername()) && !isUsernameUnique(updateUserRequest.getUsername())) {
             throw new UsernameAlreadyExistException("Username already exists");
-        }
+        }*/
     }
-    public void deleteUser(String username) {
-        if (doesUserExist(username)) {
-            userRepository.deleteUserByUsername(username);
-            logger.info("Kullanıcı başarıyla silindi: {}", username);
+    public void deleteUser(String email) {
+        if (doesUserExist(email)) {
+            userRepository.deleteUserByEmail(email);
+            logger.info("Kullanıcı başarıyla silindi: {}", email);
             throw new ResponseStatusException(HttpStatus.OK, "User deleted");
         } else {
-            logger.warn("Kullanıcı bulunamadı: {}", username);
+            logger.warn("Kullanıcı bulunamadı: {}", email);
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
     }
 
 
-    private boolean doesUserExist(String username) {
-        return userRepository.findByUsername(username).isPresent();
+    private boolean doesUserExist(String email) {
+        return userRepository.findUserByEmail(email).isPresent();
 
     }
 }

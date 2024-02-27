@@ -1,6 +1,7 @@
 package com.cinar.authentication.security;
 
 
+import com.cinar.authentication.model.Role;
 import com.cinar.authentication.security.JwtAuthFilter;
 import com.cinar.authentication.service.UserService;
 import org.springframework.context.annotation.Bean;
@@ -41,7 +42,8 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(x ->
-                        x.requestMatchers("/v1/api/user/username/{username}", "/v1/api/user/create", "/v1/api/auth/generateToken").permitAll()
+                        x.requestMatchers("v1/api/auth/**","/v1/api/user/username/{username}", "/v1/api/user/create"
+                                ,"/v1/api/auth/signup","/swagger-ui/index.html","http://localhost:8080/v1/api/user/delete/{username}").permitAll()
                 )
                 .authorizeHttpRequests(x ->
                         x.requestMatchers("/v1/api/admin/admin").hasRole("ADMIN")
