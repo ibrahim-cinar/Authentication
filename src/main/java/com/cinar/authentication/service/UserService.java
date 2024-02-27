@@ -3,6 +3,7 @@ package com.cinar.authentication.service;
 import com.cinar.authentication.dto.UserDto;
 import com.cinar.authentication.dto.request.CreateUserRequest;
 import com.cinar.authentication.dto.request.UpdateUserRequest;
+import com.cinar.authentication.dto.response.UserResponse;
 import com.cinar.authentication.exceptions.*;
 import com.cinar.authentication.model.User;
 import com.cinar.authentication.repository.UserRepository;
@@ -10,6 +11,9 @@ import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -36,20 +40,24 @@ public class UserService implements UserDetailsService {
         this.modelMapper = modelMapper;
     }
 
-    public List<UserDto> getAllUsers() {
-        return userRepository.findAll().stream().map(user -> modelMapper.map(user, UserDto.class)).collect(Collectors.toList());
+    public UserResponse getAllUsers(int pageNo,int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo,pageSize);
+        Page<User> users = userRepository.findAll(pageable);
+        List<User> userList = users.getContent();
+        List<UserDto> content = userList.stream().map(user -> modelMapper.map(user, UserDto.class)).collect(Collectors.toList());
+
+        UserResponse userResponse = new UserResponse();
+
+        userResponse.setContent(content);
+        userResponse.setPageNo(users.getNumber());
+        userResponse.setPageSize(users.getSize());
+        userResponse.setTotalElements(users.getTotalElements());
+        userResponse.setTotalPages(users.getTotalPages());
+        userResponse.setLast(users.isLast());
+
+        return userResponse;
 
     }
-
-   /* protected Optional<User> findUserByUsername(String username)
-        return userRepository.findByUsername(username);
-    }
-
-    /*public User getUserByUsername(String username) {
-        return findUserByUsername(username).orElseThrow(() -> new UserNotFoundException("User could not find by username " + username));
-
-
-    }*/
 
     protected Optional<User> findUserByEmail(String email) {
         return userRepository.findUserByEmail(email);
@@ -77,10 +85,6 @@ public class UserService implements UserDetailsService {
         return existingUserEmail.isEmpty();
     }
 
-    /*protected boolean isUsernameUnique(String username) {
-        Optional<User> existingUserUsername = userRepository.findByUsername(username);
-        return existingUserUsername.isEmpty();
-    }*/
 
 
     private static boolean isInputValid(CreateUserRequest request) {

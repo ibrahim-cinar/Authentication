@@ -48,6 +48,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(x ->
                         x.requestMatchers("/v1/api/admin/admin").hasRole("ADMIN")
                                 .requestMatchers("/v1/api/test/test").hasRole("USER")
+                                .requestMatchers("/v1/api/user/users").hasAnyRole("ADMIN")
+
                 )
                 .sessionManagement(x -> x.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())

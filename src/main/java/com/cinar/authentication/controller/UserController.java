@@ -3,12 +3,14 @@ package com.cinar.authentication.controller;
 import com.cinar.authentication.dto.UserDto;
 import com.cinar.authentication.dto.request.CreateUserRequest;
 import com.cinar.authentication.dto.request.UpdateUserRequest;
+import com.cinar.authentication.dto.response.UserResponse;
 import com.cinar.authentication.model.User;
 import com.cinar.authentication.repository.UserRepository;
 import com.cinar.authentication.service.JwtService;
 import com.cinar.authentication.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
@@ -32,15 +34,12 @@ public class UserController {
         this.authenticationManager = authenticationManager;
     }
 
-    @GetMapping("")
-    public ResponseEntity<List<UserDto>> getAllUsers(){
-        return ResponseEntity.ok(userService.getAllUsers());
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @GetMapping("/users")
+    public ResponseEntity<UserResponse> getAllUsers(@RequestParam(value = "pageNo" ,defaultValue = "0",required = false) int pageNo,
+                                                    @RequestParam(value = "pageSize" ,defaultValue = "5",required = false) int pageSize) {
+        return ResponseEntity.ok(userService.getAllUsers(pageNo,pageSize));
     }
-    /*@GetMapping("/username/{username}")
-    public ResponseEntity<UserDto> getUserByUsername(@PathVariable String username){
-        var user = modelMapper.map(userService.getUserByUsername(username),UserDto.class);
-        return ResponseEntity.ok(user);
-    }*/
     @GetMapping("/email/{email}")
     public ResponseEntity<UserDto> getUserByEmail(@PathVariable String email){
         var user = modelMapper.map(userService.getUserByEmail(email),UserDto.class);
