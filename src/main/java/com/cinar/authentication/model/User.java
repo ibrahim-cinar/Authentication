@@ -10,27 +10,48 @@ import java.util.List;
 @SuperBuilder
 @Data
 @Entity
-@Table(name = "tbl_users") @Builder
+@Table(name = "tbl_users")
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User  extends BaseEntity implements UserDetails {
-    @Column(nullable = false)
-    private String username;
-    @Column(nullable = false)
-    private String password;
+
     private String firstName;
     private String lastName;
+    @Column(nullable = false)
     private String email;
+    @Column(nullable = false)
+    private String password;
     private String phoneNumber;
 
-    private boolean accountNonExpired;
-    private boolean accountNonLocked;
-    private boolean credentialsNonExpired;
-    private boolean isEnabled;
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @JoinTable(name = "authorities", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "authority", nullable = false)
     @Enumerated(EnumType.STRING)
     private List<Role> authorities;
 
+    @Override
+    public String getUsername() {
+        return email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
