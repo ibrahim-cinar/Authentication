@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateUserRequest {
+    private String createdBy;
     private String password;
     private String firstName;
     private String lastName;

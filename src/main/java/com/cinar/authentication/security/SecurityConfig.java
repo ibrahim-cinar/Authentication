@@ -42,11 +42,11 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(x ->
-                        x.requestMatchers("v1/api/auth/**","/v1/api/user/username/{username}", "/v1/api/user/create"
-                                ,"/v1/api/auth/signup","/swagger-ui/index.html","http://localhost:8080/v1/api/user/delete/{username}").permitAll()
+                        x.requestMatchers("v1/api/auth/**","/v1/api/user/username/{username}"
+                                ,"/v1/api/auth/signup","/swagger-ui/index.html","/v3/api-docs/**","/swagger-ui/**","http://localhost:8080/v1/api/user/delete/{username}").permitAll()
                 )
                 .authorizeHttpRequests(x ->
-                        x.requestMatchers("/v1/api/admin/admin").hasRole("ADMIN")
+                        x.requestMatchers("/v1/api/admin/admin","/v1/api/user/create","/v1/api/user/update/{email}").hasRole("ADMIN")
                                 .requestMatchers("/v1/api/test/test").hasRole("USER")
                                 .requestMatchers("/v1/api/user/users").hasAnyRole("ADMIN")
 
