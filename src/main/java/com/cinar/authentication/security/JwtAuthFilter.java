@@ -1,5 +1,6 @@
 package com.cinar.authentication.security;
 
+import com.cinar.authentication.config.UserContextHolder;
 import com.cinar.authentication.service.JwtService;
 import com.cinar.authentication.service.UserService;
 import jakarta.servlet.FilterChain;
@@ -44,7 +45,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails user = userService.loadUserByUsername(userEmail);
+            UserContextHolder.setUser(user);
+            log.info("setting security context for user " + UserContextHolder.getUser().getUsername());
             log.info("user loaded " + user);
+
             if (jwtService.validateToken(token, user)) {
                 log.info("token validated " + token);
                 SecurityContext securityContext = SecurityContextHolder.createEmptyContext();

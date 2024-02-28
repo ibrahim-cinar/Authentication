@@ -1,10 +1,12 @@
 package com.cinar.authentication.service;
 
+import com.cinar.authentication.config.UserContextHolder;
 import com.cinar.authentication.dto.UserDto;
 import com.cinar.authentication.dto.request.CreateUserRequest;
 import com.cinar.authentication.dto.request.UpdateUserRequest;
 import com.cinar.authentication.dto.response.UserResponse;
 import com.cinar.authentication.exceptions.*;
+import com.cinar.authentication.model.BaseEntity;
 import com.cinar.authentication.model.User;
 import com.cinar.authentication.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -38,6 +40,7 @@ public class UserService implements UserDetailsService {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.modelMapper = modelMapper;
+
     }
 
     public UserResponse getAllUsers(int pageNo,int pageSize) {
@@ -75,14 +78,14 @@ public class UserService implements UserDetailsService {
     }
 
     public static boolean patternMatches(String emailAddress, String regexPattern) {
-        return Pattern.compile(regexPattern)
+        return !Pattern.compile(regexPattern)
                 .matcher(emailAddress)
                 .matches();
     }
 
     protected boolean isEmailUnique(String email) {
         Optional<User> existingUserEmail = userRepository.findUserByEmail(email);
-        return existingUserEmail.isEmpty();
+        return existingUserEmail.isPresent();
     }
 
 
@@ -97,26 +100,33 @@ public class UserService implements UserDetailsService {
     }
 
     public User createUser(CreateUserRequest request) {
+        var userDetails = getUserLoginEmail();
+        logger.info("Logged in user email: " + userDetails);
+
         return new User(
+                userDetails,
                 request.getFirstName(), request.getLastName(),
                 request.getEmail(),
                 bCryptPasswordEncoder.encode(request.getPassword()),
                 request.getPhoneNumber(),
                 request.getAuthorities());
     }
+    public String getUserLoginEmail(){
+        return UserContextHolder.getUser().getUsername();
+    }
 
     public User createUserFromRequest(CreateUserRequest request) {
         if (!isInputValid(request)) {
             throw new InvalidInputException("Invalid input");
         }
-        if (!isEmailUnique(request.getEmail())) {
+        if (isEmailUnique(request.getEmail())) {
             throw new EmailAlreadyExistException("Email already exists");
         }
 
-        if (!patternMatches(request.getEmail(), "^[\\w!#$%&’*+/=?`{|}~^-]+(?:\\.[\\w!#$%&’*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$")) {
+        if (patternMatches(request.getEmail(), "^[\\w!#$%&’*+/=?`{|}~^-]+(?:\\.[\\w!#$%&’*+/=?`{|}~^-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,6}$")) {
             throw new InvalidInputException("Email is not valid");
         }
-        if (!patternMatches(request.getPhoneNumber(), "\\d{10}|(?:\\d{3}-){2}\\d{4}|\\(\\d{3}\\)\\d{3}-?\\d{4}")) {
+        if (patternMatches(request.getPhoneNumber(), "\\d{10}|(?:\\d{3}-){2}\\d{4}|\\(\\d{3}\\)\\d{3}-?\\d{4}")) {
             throw new InvalidInputException("Phone number is not valid");
         }
         return createUser(request);
@@ -127,27 +137,27 @@ public class UserService implements UserDetailsService {
     }
 
     public User updateUser(String email, UpdateUserRequest updateUserRequest) {
+        var userDetails = getUserLoginEmail();
         User user = findUserByEmail(email)
                 .orElseThrow(() -> new EmailNotFoundException("Email not found: " + email));
 
         validateUniqueFields(user, updateUserRequest);
 
+        user.setUpdatedBy(userDetails);
         user.setFirstName(updateUserRequest.getFirstName());
         user.setLastName(updateUserRequest.getLastName());
         user.setEmail(updateUserRequest.getEmail());
+        user.setPhoneNumber(updateUserRequest.getPhoneNumber());
 
         User updatedUser = userRepository.save(user);
         return modelMapper.map(updatedUser, User.class);
     }
 
     protected void validateUniqueFields(User user, UpdateUserRequest updateUserRequest) {
-        if (!user.getEmail().equals(updateUserRequest.getEmail()) && !isEmailUnique(updateUserRequest.getEmail())) {
+        if (!user.getEmail().equals(updateUserRequest.getEmail()) && isEmailUnique(updateUserRequest.getEmail())) {
             throw new EmailAlreadyExistException("Email already exists");
         }
 
-       /* if (!user.getUsername().equals(updateUserRequest.getUsername()) && !isUsernameUnique(updateUserRequest.getUsername())) {
-            throw new UsernameAlreadyExistException("Username already exists");
-        }*/
     }
     public void deleteUser(String email) {
         if (doesUserExist(email)) {

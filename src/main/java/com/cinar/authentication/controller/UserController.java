@@ -55,9 +55,9 @@ public class UserController {
         var user = modelMapper.map(userService.updateUser(email,updateUserRequest),UserDto.class);
         return ResponseEntity.ok(user);
     }
-    @DeleteMapping("/delete/{username}")
-    public ResponseEntity<String> deleteUser(@PathVariable String username){
-        userService.deleteUser(username);
+    @DeleteMapping("/delete/{email}")
+    public ResponseEntity<String> deleteUser(@PathVariable String email){
+        userService.deleteUser(email);
         return ResponseEntity.ok().build();
     }
 }
