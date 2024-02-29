@@ -24,8 +24,9 @@ public class OpenApiConfig {
                                         securitySchemeName,
                                         new SecurityScheme()
                                                 .name(securitySchemeName)
-                                                .type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP)
+                                                .description("JWT Authentication")
                                                 .scheme("bearer")
+                                                .type(io.swagger.v3.oas.models.security.SecurityScheme.Type.HTTP)
                                                 .bearerFormat("JWT")))
                 .info(
                         new Info()

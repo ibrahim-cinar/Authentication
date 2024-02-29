@@ -104,7 +104,7 @@ public class UserService implements UserDetailsService {
         logger.info("Logged in user email: " + userDetails);
 
         return new User(
-                userDetails,
+               userDetails,
                 request.getFirstName(), request.getLastName(),
                 request.getEmail(),
                 bCryptPasswordEncoder.encode(request.getPassword()),
@@ -139,7 +139,7 @@ public class UserService implements UserDetailsService {
     public User updateUser(String email, UpdateUserRequest updateUserRequest) {
         var userDetails = getUserLoginEmail();
         User user = findUserByEmail(email)
-                .orElseThrow(() -> new EmailNotFoundException("Email not found: " + email));
+                .orElseThrow(() -> new EmailNotFoundException("User not found with this email: " + email));
 
         validateUniqueFields(user, updateUserRequest);
 
