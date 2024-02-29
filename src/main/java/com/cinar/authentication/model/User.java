@@ -8,10 +8,10 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
-@Data
+@Getter
+@Setter
 @Entity
 @Table(name = "tbl_users")
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User  extends BaseEntity implements UserDetails {
@@ -23,12 +23,23 @@ public class User  extends BaseEntity implements UserDetails {
     @Column(nullable = false)
     private String password;
     private String phoneNumber;
+    @OneToMany(mappedBy = "user",fetch = FetchType.EAGER)
+    private List<Token> tokens;
 
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @JoinTable(name = "authorities", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "authority", nullable = false)
     @Enumerated(EnumType.STRING)
     private List<Role> authorities;
+
+    public User(String firstName, String lastName, String email, String password, String phoneNumber, List<Role> authorities) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.password = password;
+        this.phoneNumber = phoneNumber;
+        this.authorities = authorities;
+    }
 
     public User(String createdBy,
                 String firstName, String lastName, String email, String password, String phoneNumber, List<Role> authorities) {
