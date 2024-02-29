@@ -2,11 +2,11 @@ package com.cinar.authentication.service;
 
 import com.cinar.authentication.config.UserContextHolder;
 import com.cinar.authentication.dto.UserDto;
+import com.cinar.authentication.dto.request.ChangePasswordRequest;
 import com.cinar.authentication.dto.request.CreateUserRequest;
 import com.cinar.authentication.dto.request.UpdateUserRequest;
 import com.cinar.authentication.dto.response.UserResponse;
 import com.cinar.authentication.exceptions.*;
-import com.cinar.authentication.model.BaseEntity;
 import com.cinar.authentication.model.User;
 import com.cinar.authentication.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -17,6 +17,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -24,6 +25,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -174,5 +176,18 @@ public class UserService implements UserDetailsService {
     private boolean doesUserExist(String email) {
         return userRepository.findUserByEmail(email).isPresent();
 
+    }
+
+    public void changePassword(ChangePasswordRequest changePasswordRequest, Principal connectedUser) {
+
+        var user = (User)((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
+        if(!bCryptPasswordEncoder.matches(changePasswordRequest.getCurrentPassword(), user.getPassword())) {
+            throw new WrongPasswordException("Wrong password ");
+        }
+        if(!changePasswordRequest.getNewPassword().equals(changePasswordRequest.getConfirmPassword())) {
+            throw new PasswordNotMatchException("Password not match");
+        }
+        user.setPassword(bCryptPasswordEncoder.encode(changePasswordRequest.getNewPassword()));
+        userRepository.save(user);
     }
 }
