@@ -1,6 +1,7 @@
 package com.cinar.authentication.controller;
 
 import com.cinar.authentication.dto.UserDto;
+import com.cinar.authentication.dto.request.ChangePasswordRequest;
 import com.cinar.authentication.dto.request.CreateUserRequest;
 import com.cinar.authentication.dto.request.UpdateUserRequest;
 import com.cinar.authentication.dto.response.UserResponse;
@@ -11,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 
 @RestController
@@ -31,10 +34,16 @@ public class UserController {
                                                     @RequestParam(value = "pageSize" ,defaultValue = "5",required = false) int pageSize) {
         return ResponseEntity.ok(userService.getAllUsers(pageNo,pageSize));
     }
+
     @GetMapping("/email/{email}")
     public ResponseEntity<UserDto> getUserByEmail(@PathVariable String email){
         var user = modelMapper.map(userService.getUserByEmail(email),UserDto.class);
         return ResponseEntity.ok(user);
+    }
+    @PatchMapping("/passwordChange")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest changePasswordRequest, Principal connectedUser){
+       userService.changePassword(changePasswordRequest,connectedUser);
+        return ResponseEntity.ok().build();
     }
     //@PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping("/create")

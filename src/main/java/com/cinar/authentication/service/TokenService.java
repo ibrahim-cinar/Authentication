@@ -1,0 +1,35 @@
+package com.cinar.authentication.service;
+
+import com.cinar.authentication.model.Token;
+import com.cinar.authentication.repository.TokenRepository;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+public class TokenService {
+    private final TokenRepository tokenRepository;
+    private final JwtService jwtService;
+
+    public TokenService(TokenRepository tokenRepository, JwtService jwtService) {
+        this.tokenRepository = tokenRepository;
+        this.jwtService = jwtService;
+    }
+
+
+    public boolean isTokenExpired(String tokenId) {
+        return tokenRepository.findByTokenId(tokenId).stream().anyMatch(Token::isExpired);
+
+    }
+    public boolean isTokenRevoke(String tokenId) {
+        return tokenRepository.findByTokenId(tokenId).stream().anyMatch(Token::isRevoked);
+
+    }
+    public void revokeToken(String tokenId) {
+        var token = tokenRepository.findByTokenId(tokenId).orElseThrow(() -> new RuntimeException("token not found"));
+        if(isTokenRevoke(tokenId) && isTokenExpired(tokenId)) {
+            tokenRepository.delete(token);
+        }
+    }
+
+}
