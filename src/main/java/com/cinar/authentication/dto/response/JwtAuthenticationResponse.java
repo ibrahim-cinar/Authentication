@@ -1,5 +1,7 @@
 package com.cinar.authentication.dto.response;
 
+import com.cinar.authentication.dto.UserDto;
+import com.cinar.authentication.model.User;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,4 +17,5 @@ public class JwtAuthenticationResponse {
     private String accessToken;
     @JsonProperty("refresh_token")
     private String refreshToken;
+    private UserDto user;
 }

@@ -9,11 +9,9 @@ import java.util.Optional;
 @Service
 public class TokenService {
     private final TokenRepository tokenRepository;
-    private final JwtService jwtService;
-
-    public TokenService(TokenRepository tokenRepository, JwtService jwtService) {
+    public TokenService(TokenRepository tokenRepository) {
         this.tokenRepository = tokenRepository;
-        this.jwtService = jwtService;
+
     }
 
 

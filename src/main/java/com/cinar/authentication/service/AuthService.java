@@ -1,5 +1,6 @@
 package com.cinar.authentication.service;
 
+import com.cinar.authentication.dto.UserDto;
 import com.cinar.authentication.dto.request.SignInRequest;
 import com.cinar.authentication.dto.request.SignUpRequest;
 import com.cinar.authentication.dto.response.JwtAuthenticationResponse;
@@ -15,6 +16,7 @@ import com.cinar.authentication.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,13 +37,15 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final TokenRepository tokenRepository;
+    private final ModelMapper modelMapper;
 
-    public AuthService(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, AuthenticationManager authenticationManager, JwtService jwtService, TokenRepository tokenRepository) {
+    public AuthService(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, AuthenticationManager authenticationManager, JwtService jwtService, TokenRepository tokenRepository, ModelMapper modelMapper) {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.tokenRepository = tokenRepository;
+        this.modelMapper = modelMapper;
     }
 
 
@@ -94,8 +98,9 @@ public class AuthService {
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
         savedUserToken(savedUser, jwtToken);
+        var userDto = modelMapper.map(savedUser, UserDto.class);
 
-        return JwtAuthenticationResponse.builder().accessToken(jwtToken).refreshToken(refreshToken).build();
+        return JwtAuthenticationResponse.builder().user(userDto).accessToken(jwtToken).refreshToken(refreshToken).build();
     }
 
     private void  savedUserToken(User user, String jwtToken) {
@@ -123,7 +128,9 @@ public class AuthService {
         var refreshToken = jwtService.generateRefreshToken(user);
         revokeAllUserTokens(user);
         savedUserToken(user, jwtToken);
-        return JwtAuthenticationResponse.builder().accessToken(jwtToken).refreshToken(refreshToken).build();
+        var userDto = modelMapper.map(user, UserDto.class);
+
+        return JwtAuthenticationResponse.builder().user(userDto).accessToken(jwtToken).refreshToken(refreshToken).build();
     }
     public void refreshToken(HttpServletRequest request,HttpServletResponse response) throws IOException {
         String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
