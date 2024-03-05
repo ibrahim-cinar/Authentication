@@ -15,7 +15,7 @@ public class Token {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    public String id;
+    public String tokenId;
 
     @Column(unique = true)
     public String token;
